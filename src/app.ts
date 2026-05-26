@@ -1,9 +1,10 @@
 import express, { Application, Request, Response } from "express";
 import { prisma } from "./app/lib/prisma";
 import { IndexRoutes } from "./app/routes";
+import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
+import { notFound } from "./app/middlewares/notFound";
 
 const app: Application = express();
-
 
 // Enable URL-encoded form data parsing
 app.use(express.urlencoded({ extended: true }));
@@ -14,18 +15,20 @@ app.use(express.json());
 app.use("/api/v1", IndexRoutes);
 
 // Basic route
-app.get('/', async (req: Request, res: Response) => {
-
-    const specialty = await prisma.specialty.create({
-        data: {
-            title: 'Cardiology'
-        }
-    })
-    res.status(201).json({
-        success: true,
-        message: 'API is working',
-        data: specialty
-    })
+app.get("/", async (req: Request, res: Response) => {
+  const specialty = await prisma.specialty.create({
+    data: {
+      title: "Cardiology",
+    },
+  });
+  res.status(201).json({
+    success: true,
+    message: "API is working",
+    data: specialty,
+  });
 });
+
+app.use(globalErrorHandler);
+app.use(notFound);
 
 export default app;
